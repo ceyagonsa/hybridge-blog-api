@@ -17,18 +17,19 @@ if (process.env.DATABASE_URL) {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false
+        rejectUnauthorized: false // necesario para Supabase Free
       }
     },
     pool: {
       max: 3,        // 🔴 Supabase free: máximo 3 conexiones
       min: 0,
-      acquire: 30000,
-      idle: 10000
+      acquire: 20000, // tiempo máximo para obtener conexión
+      idle: 5000      // libera conexiones inactivas rápido
     },
     define: {
       timestamps: true // ⬅️ timestamps automáticos en todos los modelos
-    }
+    },
+    logging: false // ⬅️ opcional: puedes poner console.log para debug
   });
 } else {
   // =======================================
@@ -44,8 +45,9 @@ if (process.env.DATABASE_URL) {
     {
       ...config,
       define: {
-        timestamps: true // ⬅️ también local
-      }
+        timestamps: true
+      },
+      logging: console.log // útil para desarrollo
     }
   );
 }
