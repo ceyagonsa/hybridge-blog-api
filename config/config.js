@@ -17,11 +17,13 @@ module.exports = {
         keepAlive: true
       },
       pool: {
-        max: 3,            // Estricto: 1 sola conexión para evitar saturación
+        max: 2,           
         min: 0,
-        acquire: 30000,    // 60 segundos de paciencia para conectar
-        idle: 10000,        // Libera la conexión en 1 segundo
-        // evict: 500         // Limpieza constante de conexiones muertas
-      }
+        acquire: 60000,    // Aumentamos a 60s para dar margen a Render
+        idle: 5000,        
+        evict: 1000       
+      },
+      // Esto evita que Sequelize intente usar prepared statements que rompen el puerto 6543
+      minifyAliases: true 
     }
   };
