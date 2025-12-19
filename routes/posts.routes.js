@@ -1,64 +1,26 @@
-const { Router } = require('express');
-const db = require('../models');
+const express = require('express');
+const router = express.Router();
+const { Post } = require('../models'); // Asegúrate de que la ruta a models sea correcta
 
-const router = Router();
-
-// CREATE
-router.post('/', async (req, res) => {
-  const { title, content, authorId } = req.body;
-
-  if (!title || !content || !authorId) {
-    return res.status(400).json({ error: 'Campos requeridos' });
-  }
-
-  const post = await db.Post.create({ title, content, authorId });
-  res.status(201).json(post);
-});
-
-// READ ALL
 router.get('/', async (req, res) => {
-  const posts = await db.Post.findAll({
-    include: db.Author
-  });
-  res.json(posts);
-});
-
-// READ ONE
-router.get('/:id', async (req, res) => {
-  const post = await db.Post.findByPk(req.params.id, {
-    include: db.Author
-  });
-
-  if (!post) {
-    return res.status(404).json({ error: 'Post no encontrado' });
+  console.log('Intentando obtener posts...'); // Esto saldrá en los logs de Render
+  
+  try {
+    // Agregamos un timeout manual para que no se quede cargando por siempre
+    const posts = await Post.findAll({ timeout: 10000 }); 
+    
+    if (!posts || posts.length === 0) {
+      return res.json({ message: "No hay posts registrados aún", data: [] });
+    }
+    
+    res.json(posts);
+  } catch (error) {
+    console.error('ERROR EN GET POSTS:', error);
+    res.status(500).json({ 
+      error: 'Hubo un problema con la base de datos',
+      details: error.message 
+    });
   }
-
-  res.json(post);
-});
-
-// UPDATE
-router.patch('/:id', async (req, res) => {
-  const post = await db.Post.findByPk(req.params.id);
-
-  if (!post) {
-    return res.status(404).json({ error: 'Post no encontrado' });
-  }
-
-  Object.assign(post, req.body);
-  await post.save();
-  res.json(post);
-});
-
-// DELETE
-router.delete('/:id', async (req, res) => {
-  const post = await db.Post.findByPk(req.params.id);
-
-  if (!post) {
-    return res.status(404).json({ error: 'Post no encontrado' });
-  }
-
-  await post.destroy();
-  res.json({ message: 'Post eliminado correctamente' });
 });
 
 module.exports = router;

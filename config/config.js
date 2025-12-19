@@ -7,6 +7,13 @@ module.exports = {
           require: true,
           rejectUnauthorized: false
         }
+      },
+      // Agrega esto para que la conexión no se quede colgada:
+      pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
       }
     }
   };
