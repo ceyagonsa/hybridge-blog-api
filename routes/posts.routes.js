@@ -3,42 +3,38 @@ const router = express.Router();
 const { Post, Author } = require('../models'); 
 
 router.get('/', async (req, res) => {
-  console.log('--- Nueva petición: Intentando obtener posts ---');
+  console.log('--- [PASO 1] Petición recibida en /posts ---');
   
   try {
-    // Buscamos los posts e incluimos al autor para que la respuesta sea completa
+    console.log('--- [PASO 2] Consultando a la base de datos... ---');
+    
     const posts = await Post.findAll({
       include: [{
         model: Author,
-        as: 'author' // Debe coincidir con el 'as' de tu modelo Post
+        as: 'author'
       }],
-      order: [['createdAt', 'DESC']] // Opcional: los más nuevos primero
+      order: [['createdAt', 'DESC']]
     });
     
-    if (!posts || posts.length === 0) {
-      console.log('Consulta exitosa: No hay posts.');
-      return res.status(200).json([]); // Devolvemos array vacío para que el frontend no rompa
-    }
-    
-    console.log(`Consulta exitosa: Se encontraron ${posts.length} posts.`);
+    console.log(`--- [PASO 3] Éxito: ${posts.length} posts encontrados ---`);
     return res.status(200).json(posts);
 
   } catch (error) {
-    console.error('--- ERROR DETALLADO EN RUTA POSTS ---');
-    console.error('Nombre:', error.name);
+    console.error('--- [ERROR] Error en la ruta de posts ---');
+    console.error('Tipo de Error:', error.name);
     console.error('Mensaje:', error.message);
     
-    // Si el error es de timeout, enviamos un aviso claro
+    // Respuesta específica para problemas de conexión
     if (error.name === 'SequelizeConnectionAcquireTimeoutError') {
       return res.status(504).json({
-        error: 'La base de datos tardó demasiado en responder. Intenta refrescar.',
-        type: error.name
+        error: 'Tiempo de espera agotado. La base de datos está tardando en responder.',
+        suggestion: 'Refresca la página en 10 segundos.'
       });
     }
 
     return res.status(500).json({ 
-      error: 'Hubo un problema con la base de datos',
-      message: error.message 
+      error: 'Error interno del servidor',
+      detail: error.message 
     });
   }
 });
