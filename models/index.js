@@ -3,18 +3,15 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const process = require('process');
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
 let sequelize;
-// Si hay una URL de base de datos (como en Render), usamos SSL obligatorio
+
+// PRODUCCIÓN (Render / Supabase)
 if (process.env.DATABASE_URL) {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
-    protocol: 'postgres',
     dialectOptions: {
       ssl: {
         require: true,
@@ -23,25 +20,34 @@ if (process.env.DATABASE_URL) {
     }
   });
 } else {
-  // Configuración para tu computadora (local)
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // LOCAL
+  const env = process.env.NODE_ENV || 'development';
+  const config = require(__dirname + '/../config/config.json')[env];
+
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  );
 }
 
-// Leemos todos los archivos de modelos en la carpeta
+// Cargar modelos
 fs.readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
+  .filter(file =>
+    file.indexOf('.') !== 0 &&
+    file !== basename &&
+    file.endsWith('.js')
+  )
   .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    const model = require(path.join(__dirname, file))(
+      sequelize,
+      Sequelize.DataTypes
+    );
     db[model.name] = model;
   });
 
+// Asociaciones
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
