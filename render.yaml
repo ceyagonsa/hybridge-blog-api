@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: hybridge-blog-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npx sequelize-cli db:migrate --config config/config.json && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
