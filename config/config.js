@@ -15,12 +15,12 @@ module.exports = {
           rejectUnauthorized: false
         }
       },
-      // El 'pool' es vital para que la conexión no se quede colgada
+      // Configuración de Pool optimizada para Render + Supabase
       pool: {
         max: 5,
-        min: 0,
-        acquire: 30000, 
-        idle: 10000
+        min: 1,           // Mantiene al menos una conexión "viva"
+        acquire: 60000,   // Tiempo máximo de espera (60 segundos)
+        idle: 10000       // Cierra conexiones inactivas después de 10 segundos
       }
     }
   };
