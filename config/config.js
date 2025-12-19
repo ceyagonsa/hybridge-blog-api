@@ -13,15 +13,15 @@ module.exports = {
         ssl: {
           require: true,
           rejectUnauthorized: false
-        }
+        },
+        keepAlive: true
       },
-      // Configuración de Pool optimizada para Render + Supabase
       pool: {
-        max: 2,
-        min: 0,           // Mantiene al menos una conexión "viva"
-        acquire: 60000,   // Tiempo máximo de espera (60 segundos)
-        idle: 5000,
-        evict: 1000      // Cierra conexiones inactivas después de 10 segundos
+        max: 1,            // Estricto: 1 sola conexión para evitar saturación
+        min: 0,
+        acquire: 60000,    // 60 segundos de paciencia para conectar
+        idle: 1000,        // Libera la conexión en 1 segundo
+        evict: 500         // Limpieza constante de conexiones muertas
       }
     }
   };

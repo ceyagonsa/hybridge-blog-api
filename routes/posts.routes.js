@@ -1,27 +1,43 @@
 const express = require('express');
 const router = express.Router();
-const { Post } = require('../models'); // Asegúrate de que la ruta a models sea correcta
+const { Post, Author } = require('../models'); 
 
 router.get('/', async (req, res) => {
-  console.log('Intentando obtener posts...'); // Esto saldrá en los logs de Render
+  console.log('--- Nueva petición: Intentando obtener posts ---');
   
   try {
-    // Agregamos un timeout manual para que no se quede cargando por siempre
-    const posts = await Post.findAll({ timeout: 10000 }); 
+    // Buscamos los posts e incluimos al autor para que la respuesta sea completa
+    const posts = await Post.findAll({
+      include: [{
+        model: Author,
+        as: 'author' // Debe coincidir con el 'as' de tu modelo Post
+      }],
+      order: [['createdAt', 'DESC']] // Opcional: los más nuevos primero
+    });
     
     if (!posts || posts.length === 0) {
-      return res.json({ message: "No hay posts registrados aún", data: [] });
+      console.log('Consulta exitosa: No hay posts.');
+      return res.status(200).json([]); // Devolvemos array vacío para que el frontend no rompa
     }
     
-    res.json(posts);
+    console.log(`Consulta exitosa: Se encontraron ${posts.length} posts.`);
+    return res.status(200).json(posts);
+
   } catch (error) {
-    console.error('--- ERROR DETALLADO ---');
+    console.error('--- ERROR DETALLADO EN RUTA POSTS ---');
     console.error('Nombre:', error.name);
     console.error('Mensaje:', error.message);
     
-    res.status(500).json({ 
+    // Si el error es de timeout, enviamos un aviso claro
+    if (error.name === 'SequelizeConnectionAcquireTimeoutError') {
+      return res.status(504).json({
+        error: 'La base de datos tardó demasiado en responder. Intenta refrescar.',
+        type: error.name
+      });
+    }
+
+    return res.status(500).json({ 
       error: 'Hubo un problema con la base de datos',
-      name: error.name,
       message: error.message 
     });
   }
