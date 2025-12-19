@@ -9,7 +9,7 @@ const db = {};
 let sequelize;
 
 // =======================================
-// PRODUCCIÓN (Render / Supabase)
+// PRODUCCIÓN (Render / Supabase) CON LOGGING
 // =======================================
 if (process.env.DATABASE_URL) {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
@@ -17,19 +17,19 @@ if (process.env.DATABASE_URL) {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false // necesario para Supabase Free
+        rejectUnauthorized: false
       }
     },
     pool: {
-      max: 3,        // 🔴 Supabase free: máximo 3 conexiones
+      max: 3,
       min: 0,
-      acquire: 20000, // tiempo máximo para obtener conexión
-      idle: 5000      // libera conexiones inactivas rápido
+      acquire: 20000,
+      idle: 5000
     },
     define: {
-      timestamps: true // ⬅️ timestamps automáticos en todos los modelos
+      timestamps: true
     },
-    logging: false // ⬅️ opcional: puedes poner console.log para debug
+    logging: console.log // ⬅️ activado para debug
   });
 } else {
   // =======================================
