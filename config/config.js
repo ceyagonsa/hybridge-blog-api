@@ -1,13 +1,13 @@
 module.exports = {
     development: {
       username: "postgres",
-      password: "tu_password_local",
-      database: "tu_db_local",
+      password: "password",
+      database: "database_dev",
       host: "127.0.0.1",
       dialect: "postgres"
     },
     production: {
-      use_env_variable: 'DATABASE_URL',
+      url: process.env.DATABASE_URL, // Cambiamos 'use_env_variable' por 'url'
       dialect: 'postgres',
       dialectOptions: {
         ssl: {
