@@ -1,20 +1,18 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Post extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      //Un post pertenece a un autor
-      Post.belongsTo(models.Author, { foreignKey: 'authorId' });
-      // define association here
+      // Usamos 'Author' porque así se llama el modelo en Sequelize
+      // Y la foreignKey debe coincidir con el nombre exacto en tu tabla
+      Post.belongsTo(models.Author, { 
+        foreignKey: 'authorId', 
+        as: 'author' 
+      });
     }
   }
+
   Post.init({
     title: DataTypes.STRING,
     content: DataTypes.TEXT,
@@ -23,7 +21,14 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Post',
-    paranoid: true, // <-- Esto activa el soft delete
+    // ESTO ES LO MÁS IMPORTANTE:
+    // Debe coincidir letra por letra con lo que viste en Supabase
+    tableName: 'Posts', 
+    // Si en Supabase las columnas NO tienen guion bajo (como authorId), 
+    // deja 'underscored' en false o quítalo.
+    underscored: false, 
+    paranoid: true,
   });
+
   return Post;
 };

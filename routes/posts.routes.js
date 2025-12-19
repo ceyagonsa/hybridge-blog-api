@@ -15,10 +15,14 @@ router.get('/', async (req, res) => {
     
     res.json(posts);
   } catch (error) {
-    console.error('ERROR EN GET POSTS:', error);
+    console.error('--- ERROR DETALLADO ---');
+    console.error('Nombre:', error.name);
+    console.error('Mensaje:', error.message);
+    
     res.status(500).json({ 
       error: 'Hubo un problema con la base de datos',
-      details: error.message 
+      name: error.name,
+      message: error.message 
     });
   }
 });

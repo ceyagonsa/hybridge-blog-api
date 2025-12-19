@@ -1,27 +1,37 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Author extends Model {
     /**
      * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
      */
     static associate(models) {
       // Un autor tiene muchos posts
-      Author.hasMany(models.Post, { foreignKey: 'authorId'});
-      // define association here
+      // Importante: La foreignKey debe llamarse igual en ambos modelos
+      Author.hasMany(models.Post, { 
+        foreignKey: 'authorId',
+        as: 'posts'
+      });
     }
   }
+
   Author.init({
-    name: DataTypes.STRING,
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     deletedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Author',
-    paranoid: true,
+    // ESTO CORRIGE LA CONEXIÓN:
+    // Debe ser 'Authors' (Plural y con A mayúscula como en Supabase)
+    tableName: 'Authors', 
+    underscored: false, // Usamos false porque tus columnas son authorId (CamelCase)
+    paranoid: true,     // Para que funcione el soft delete
+    timestamps: true    // Asegúrate de tener created_at/updated_at o createdAt/updatedAt
   });
+
   return Author;
 };
