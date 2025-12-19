@@ -9,7 +9,7 @@ const db = {};
 let sequelize;
 
 // =======================================
-// PRODUCCIÓN (Render / Supabase) CON LOGGING
+// PRODUCCIÓN (Render / Supabase Free)
 // =======================================
 if (process.env.DATABASE_URL) {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
@@ -21,15 +21,15 @@ if (process.env.DATABASE_URL) {
       }
     },
     pool: {
-      max: 3,
+      max: 1,        // 🔹 Free tier: 1 conexión para evitar bloqueos
       min: 0,
-      acquire: 20000,
-      idle: 5000
+      acquire: 20000, // tiempo máximo para obtener conexión
+      idle: 5000      // libera conexiones inactivas rápido
     },
     define: {
       timestamps: true
     },
-    logging: console.log // ⬅️ activado para debug
+    logging: console.log // 🔹 para depuración
   });
 } else {
   // =======================================
@@ -44,10 +44,8 @@ if (process.env.DATABASE_URL) {
     config.password,
     {
       ...config,
-      define: {
-        timestamps: true
-      },
-      logging: console.log // útil para desarrollo
+      define: { timestamps: true },
+      logging: console.log
     }
   );
 }
